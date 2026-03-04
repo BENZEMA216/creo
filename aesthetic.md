@@ -1,4 +1,4 @@
-# Creo — 审美工作记忆
+# Aesthetic — 审美工作记忆
 
 你在创作过程中读写这套文件。不是参考资料，是你的审美记忆。
 
@@ -6,8 +6,8 @@
 
 | 文件 | 用途 | 何时读 | 何时写 |
 |------|------|--------|--------|
-| `creo-fragments.md` | 单条审美经验 | Preflight + 构建 prompt 时 | 创作完成后 Solidify |
-| `creo-patterns.md` | 可复用的风格模式 | Preflight + 选择创作路径时 | 同类碎片积累 3+ 条时归纳 |
+| `aesthetic-fragments.md` | 单条审美经验 | Preflight + 构建 prompt 时 | 创作完成后 Solidify |
+| `aesthetic-patterns.md` | 可复用的风格模式 | Preflight + 选择创作路径时 | 同类碎片积累 3+ 条时归纳 |
 | `brand-<slug>.md` | 品牌完整档案 | 品牌相关任务 Preflight | 品牌信息更新时 |
 
 ## Preflight（创作前）
@@ -15,8 +15,8 @@
 收到设计/出图需求，先跑：
 
 1. **识别品牌** → 有品牌：读 `brand-<slug>.md`；无品牌：跳过
-2. **匹配 Pattern** → 扫 `creo-patterns.md`，找与任务匹配的风格模式
-3. **检索 Fragment** → 扫 `creo-fragments.md`，**优先看 type: negative 的碎片**
+2. **匹配 Pattern** → 扫 `aesthetic-patterns.md`，找与任务匹配的风格模式
+3. **检索 Fragment** → 扫 `aesthetic-fragments.md`，**优先看 type: negative 的碎片**
 4. **判断**：
    - 品牌任务但档案缺失 → 告诉用户，先补档案再开始
    - 有匹配 Pattern → 直接用 Pattern 参数构建 prompt
@@ -24,7 +24,7 @@
    - 什么都没有 → 按用户描述 + 通用审美执行，创作后沉淀碎片
 
 **Preflight 完成后，必须在对话中说出**：
-- "已读 Creo"
+- "已读 Aesthetic"
 - 匹配到的 Pattern/Fragment 编号（如 P-001, F-002）
 - 如果没有匹配 → "首次尝试，无历史记录"
 
@@ -62,7 +62,7 @@
 - 某个 prompt 参数组合效果特别好 → 记录参数
 
 ### 写入格式
-追加到 `creo-fragments.md`，用以下格式：
+追加到 `aesthetic-fragments.md`，用以下格式：
 
 ```yaml
 ## F-<编号> <日期>
@@ -78,7 +78,7 @@ source: 用户反馈 | 创作实践 | 竞品采集
 ```
 
 ### Pattern 归纳
-同类碎片积累 3 条以上，归纳为 Pattern 写入 `creo-patterns.md`：
+同类碎片积累 3 条以上，归纳为 Pattern 写入 `aesthetic-patterns.md`：
 
 ```yaml
 ## P-<编号> <模式名称>
