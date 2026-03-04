@@ -1,200 +1,87 @@
-# Creo — Multimodal Aesthetic Memory Platform
+# Creo — 审美工作记忆
 
-> *Creo* — Latin: "I create"
+你在创作过程中读写这套文件。不是参考资料，是你的审美记忆。
 
-## Purpose
-Reflect on, record, and reuse aesthetic experience across AIGC creation sessions.
-Every asset is stored in three levels: **text profiles** (Level 1) + **style samples** (Level 2) + **original assets** (Level 3).
+## 文件结构
 
----
+| 文件 | 用途 | 何时读 | 何时写 |
+|------|------|--------|--------|
+| `creo-fragments.md` | 单条审美经验 | Preflight + 构建 prompt 时 | 创作完成后 solidify |
+| `creo-patterns.md` | 可复用的风格模式 | Preflight + 选择创作路径时 | 同类碎片积累 3+ 条时归纳 |
+| `brand-<slug>.md` | 品牌完整档案 | 品牌相关任务 Preflight | 品牌信息更新时 |
 
-## 0. Preflight Check / 初始化自检
+## Preflight（创作前）
 
-**When**: Agent 开始任何设计/创作任务前，必须先执行自检。
-**Why**: 确认品牌资源的完备性，提前发现缺失，避免创作到一半才发现素材不够。
+收到设计/出图需求，先跑：
 
-### Check Procedure
+1. **识别品牌** → 有品牌：读 `brand-<slug>.md`；无品牌：跳过
+2. **匹配 Pattern** → 扫 `creo-patterns.md`，找与任务匹配的风格模式
+3. **检索 Fragment** → 扫 `creo-fragments.md`，找相关正面碎片和负面碎片
+4. **判断**：
+   - 品牌任务但档案缺失 → 告诉用户，先补档案再开始
+   - 有匹配 Pattern → 直接用 Pattern 参数构建 prompt
+   - 只有 Fragment → 从碎片拼装，精准度下降
+   - 什么都没有 → 按用户描述 + 通用审美执行，创作后沉淀碎片
 
-```
-[Creo Preflight] 品牌: <brand-name>
-──────────────────────────────────────
+## Prompt 构建（创作中）
 
-Level 1 — 品牌档案
-  [ ] brand-<slug>.md 存在
-  [ ] Identity 完整（slogan / philosophy / audience / positioning）
-  [ ] Visual DNA 完整（color palette / typography / photography / layout）
-  [ ] Tone of Voice 完整（writing style / key phrases / patterns）
-  [ ] Product Catalog 有数据
-  [ ] Asset Inventory 有条目
+从匹配的 Pattern / Fragment 中提取具体参数写进 prompt：
 
-Level 2 — 风格样本
-  [ ] 至少 3 张可用的风格参考图（社区样本或脱敏参考）
-  [ ] 配色板截图 / 色值表存在
+- **光影**：方向、硬度、色温
+- **构图**：裁切方式、主体位置、留白比例
+- **配色**：主色调、饱和度范围、背景色
+- **情绪**：松弛/克制/高级/街头
+- **禁忌**：负面碎片中标记的"不要"
 
-Level 3 — 原始素材
-  [ ] photos/ 目录有文件，数量: ___
-  [ ] catalogs/ 目录有文件，数量: ___
-  [ ] creo:// ID 可解析，抽查 1 个确认可访问
+不要凭空编 prompt 参数。有记录就用记录，没有就老实说是首次尝试。
 
-Summary
-  可用层级: Level ___ (最高)
-  缺失项: ___
-  建议: ___
-```
+## Solidify（创作后）
 
-### Check Rules
+创作完成 + 收到用户反馈后，提取审美经验：
 
-1. **全部通过** → 正常开始创作
-2. **Level 3 缺失** → 警告用户："原始素材不可用，将使用风格样本和文字档案，精准度会下降"
-3. **Level 2 也缺失** → 警告用户："仅有文字档案可用，建议先补充素材再开始创作"
-4. **Level 1 缺失** → **阻断**，不允许开始。要求先完成品牌档案录入
-5. **Level 1 部分缺失** → 列出缺失字段，询问用户是否继续（带风险提示）
+### 触发条件
+- 用户说"好" / 确认使用 → 提取正面碎片
+- 用户纠正方向 → 提取负面碎片 + 正确方向
+- 发现新的有效视觉手法 → 提取技法碎片
+- 某个 prompt 参数组合效果特别好 → 记录参数
 
-### Auto-fix Actions
+### 写入格式
+追加到 `creo-fragments.md`，用以下格式：
 
-自检发现问题时，Agent 应主动修复：
-
-| 问题 | 自动修复 |
-|------|----------|
-| brand profile 不存在 | 引导用户提供资料，按 Intake Protocol 创建 |
-| Visual DNA 为空 | 如果有 Level 3 素材，自动从图片提取色板/风格 |
-| Asset Inventory 过期 | 扫描素材目录，补全缺失条目 |
-| creo:// ID 无法解析 | 标记为 broken，降级到下一层 |
-| 素材目录为空 | 提示用户上传，给出上传指引 |
-
----
-
-## 1. Asset Intake Protocol
-
-When user provides new design materials:
-
-### Step 1: Stabilize Files
-- Copy from temp paths (WeChat, /tmp, Downloads) → `design-assets/<brand-slug>/`
-- Directory structure per brand:
-  ```
-  design-assets/<brand-slug>/
-  ├── photos/        # Product photography, lookbook shots
-  ├── catalogs/      # PDF line sheets, product manuals
-  ├── brand-vi/      # Logo, brand guidelines, VI files
-  ├── store-assets/  # Store screenshots, banners, homepage captures
-  └── references/    # Competitor refs, mood boards, inspiration
-  ```
-- Upload to platform storage, generate `creo://` IDs
-
-### Step 2: Visual DNA Extraction
-For each batch of assets, extract and document:
-
-**Color Palette** — identify dominant colors with descriptive names + approximate hex
-**Typography** — font families, weights, sizes, hierarchy patterns
-**Photography Style** — lighting, composition, model styling, background treatment
-**Layout Patterns** — grid systems, whitespace usage, information hierarchy
-**Texture & Materials** — recurring material/texture themes in imagery
-
-### Step 3: Write Brand Profile
-Create/update `brand-<slug>.md` with the template below.
-
-### Step 4: Update Index & Run Preflight
-Add/update entry in index. Run Preflight Check to verify completeness.
-
----
-
-## 2. Brand Profile Template
-
-```markdown
-# Brand: <Name>
-
-## Identity
-- Slogan:
-- Philosophy:
-- Target audience:
-- Price positioning:
-- Key differentiator:
-
-## Visual DNA
-
-### Color Palette
-| Name | Hex (approx) | Usage |
-|------|-------------|-------|
-| ... | ... | ... |
-
-### Typography & Layout
-- Heading style:
-- Body style:
-- Layout pattern:
-- Whitespace philosophy:
-
-### Photography Style
-- Lighting:
-- Backgrounds:
-- Model styling:
-- Composition:
-- Post-processing:
-
-### Tone of Voice
-- Writing style:
-- Key phrases:
-- Copywriting patterns:
-
-## Product Lines
-(Series name, positioning, price range, key materials)
-
-## Product Catalog
-(Full SKU list with: code, name, colors, price, key fabric, design concept)
-
-## Asset Inventory
-(creo:// IDs with descriptions for each asset)
+```yaml
+## F-<编号> <日期>
+type: positive | negative | technique
+tags: [构图, 街拍, 光影, 配色, 排版, 生图, 审美, ...]
+brand: <brand-slug> | null
+summary: 一句话描述
+detail: |
+  具体内容。正面碎片写"什么好、为什么好"。
+  负面碎片写"什么不好、应该怎么做"。
+  技法碎片写"具体参数和操作步骤"。
+source: 用户反馈 | 创作实践 | 竞品采集
 ```
 
----
+### Pattern 归纳
+同类碎片积累 3 条以上，归纳为 Pattern 写入 `creo-patterns.md`：
 
-## 3. Querying Rules for Future Sessions
-
-When a task involves design work for an existing brand:
-
-1. **Run Preflight Check** — verify resource completeness before starting
-2. **Read the brand profile** — `brand-<slug>.md`
-3. **Pull visual references** — via `creo://` IDs, auto-degrade if unavailable
-4. **Follow Visual DNA** — colors, typography, tone as constraints
-5. **Cross-reference Product Catalog** — for product accuracy
-
-### Three-Level Degradation
-
-```
-Agent requests creo://seek-within/photo/001
-  → Level 3 available? Return original asset
-  → Level 3 denied?   Return Level 2 style sample + warning
-  → Level 2 empty?    Return Level 1 text description + strong warning
+```yaml
+## P-<编号> <模式名称>
+tags: [关键词]
+features:
+  - 视觉特征 1
+  - 视觉特征 2
+use_when: 适用场景
+fragments: [F-001, F-003, F-007]  # 来源碎片
+prompt_template: |
+  可直接用于生图的 prompt 片段（参数化）
+avoid:
+  - 注意事项 / 禁忌
 ```
 
-### Cross-brand reference
-When designing for Brand A but referencing Brand B's style:
-- Read both brand profiles
-- Document which elements are borrowed vs. original
-- Never mix brand identities without explicit user instruction
+## 规则
 
----
-
-## 4. Asset Update Protocol
-
-When user provides additional materials for an existing brand:
-1. Copy files to existing `design-assets/<brand>/` subdirectory
-2. Generate `creo://` IDs for new assets
-3. Update the Asset Inventory section in the brand profile
-4. If new visual patterns emerge, update Visual DNA
-5. If new products, append to Product Catalog
-6. Re-run Preflight Check to verify completeness
-
----
-
-## 5. Multimodal Reference Patterns
-
-### For AI image generation prompts
-Use Visual DNA to construct style-consistent prompts:
-- "Photography in the style of [brand]: [lighting], [background], [composition], [mood]"
-- Reference `creo://` IDs for visual grounding
-
-### For layout design (Pencil/.pen files)
-Use Layout Patterns + Color Palette + Typography to ensure brand consistency.
-
-### For copywriting
-Use Tone of Voice section — key phrases, writing patterns, philosophy keywords.
+1. **Preflight 不可跳过** — AGENTS.md 已写死
+2. **不要凭空造审美判断** — 用记录说话，没记录就标注"首次尝试"
+3. **负面碎片比正面碎片更重要** — 用户纠正过的错误绝不能重犯
+4. **创作后必须 solidify** — 哪怕只写一条碎片
+5. **碎片要具体** — "好看"不是碎片，"低饱和灰地面 + 45° 硬光 + 平铺 = 高级静物感"才是
